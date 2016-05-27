@@ -1,5 +1,8 @@
 package com.imgod.gaokang.testrealm.model;
 
+import java.util.List;
+
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -10,13 +13,23 @@ public class User extends RealmObject {
     private String name;
     private int age;
     @PrimaryKey
-    private String id;
+    private int id;
 
-    public String getId() {
+    private RealmList<RealmString> thingList;
+
+    public RealmList<RealmString> getThingList() {
+        return thingList;
+    }
+
+    public void setThingList(RealmList<RealmString> thingList) {
+        this.thingList = thingList;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -42,6 +55,7 @@ public class User extends RealmObject {
                 "name='" + name + '\'' +
                 ", age=" + age +
                 ", id=" + id +
+                ", thingList=" + thingList.size() +
                 '}';
     }
 }

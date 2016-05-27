@@ -1,18 +1,21 @@
 package com.imgod.gaokang.testrealm;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.imgod.gaokang.testrealm.model.RealmString;
 import com.imgod.gaokang.testrealm.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.txt_add:
                 Toast.makeText(MainActivity.this, "txt_add", Toast.LENGTH_SHORT).show();
                 realmAdd();
-                id++;
+//                id++;
                 break;
             case R.id.txt_del:
                 Toast.makeText(MainActivity.this, "txt_del", Toast.LENGTH_SHORT).show();
@@ -72,28 +75,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void realmAdd() {
-        realm.beginTransaction();
-        User user = realm.createObject(User.class);
-        user.setId("" + id);
+        Log.e("realmAdd", "id:" + id);
+        //这是推荐做法, realm.createObject()不好用.有默认值容易出错
+        User user = new User();
+        user.setId(id++);
         user.setName("kk0");
         user.setAge(20);
+        RealmList<RealmString> list = new RealmList<>();
+        for (int i = 0; i < id; i++) {
+            RealmString thing = new RealmString();
+            thing.setThing("xxx");
+            list.add(thing);
+        }
+        user.setThingList(list);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(user);
         realm.commitTransaction();
     }
 
     private void realmDelete() {
         realm.beginTransaction();
-        realm.where(User.class).equalTo("id", "0").findFirst().deleteFromRealm();
+        realm.where(User.class).equalTo("id", 0).findFirst().deleteFromRealm();
         realm.commitTransaction();
     }
 
     private void realmUpdate() {
+        //这种更新也可以,但是太费劲
+//        User user = new User();
+//        user.setId(1);
+//        user.setName("gaokang");
+//        user.setAge(888);
+
+        //还是这种更新比较轻松
         realm.beginTransaction();
-        realm.where(User.class).equalTo("id", "1").findFirst().setName("gaokang");
+        // realm.copyToRealmOrUpdate(user);
+        realm.where(User.class).equalTo("id", 1).findFirst().setName("gaokang");
         realm.commitTransaction();
     }
 
     private void realmQuery() {
-        List<User> userList = realm.where(User.class).beginsWith("name", "kk").findAllSorted("id", Sort.ASCENDING);
+        //beginsWith("name", "kk")
+        List<User> userList = realm.where(User.class).findAllSorted("id", Sort.ASCENDING);
         StringBuilder stringBuilder = new StringBuilder();
         for (User user : userList) {
             Log.e("realmQuery", user.toString());
